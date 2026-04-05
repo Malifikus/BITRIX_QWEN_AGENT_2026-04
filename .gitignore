@@ -1,64 +1,50 @@
-# Build artifacts
-build/
-dist/
+```
+# Compiled and build artifacts
+*.pyc
+__pycache__/
+*.o
+*.obj
+*.class
+*.exe
+*.dll
+*.so
+*.a
+*.out
 
 # Dependencies
 node_modules/
-vendor/
-
-# Logs
-*.log
-
-# Environment
+venv/
+.venv/
 .env
 .env.local
-.env.*
+*.env.*
+
+# Logs and temp files
+*.log
+*.tmp
+*.swp
+*.swo
 
 # Editors
 .vscode/
 .idea/
 
-# OS generated files
-.DS_Store
-Thumbs.db
-
-# Cache directories
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-
-# Backup files
-*.bak
-*.backup
-
-# Temporary files
-*.tmp
-*.temp
-
-# Coverage reports
+# Coverage
 coverage/
 htmlcov/
+.coverage
 
-# Test results
-test-results/
-junit.xml
+# Build directories
+dist/
+build/
+target/
+.gradle/
 
-# Compressed archives
-*.zip
-*.tar.gz
-*.tar.bz2
-*.tar.xz
-*.gz
-*.rar
-*.7z
+# Python specific
+.mypy_cache/
+.pytest_cache/
 
-# IDE specific
-*.swp
-*.swo
-
-# Bitrix specific
-bitrix/cache/
-bitrix/managed_cache/
-bitrix/stack_cache/
-upload/tmp/
+# System files
+.DS_Store
+Thumbs.db
+```
