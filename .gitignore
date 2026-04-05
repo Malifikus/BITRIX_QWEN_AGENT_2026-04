@@ -1,0 +1,64 @@
+# Build artifacts
+build/
+dist/
+
+# Dependencies
+node_modules/
+vendor/
+
+# Logs
+*.log
+
+# Environment
+.env
+.env.local
+.env.*
+
+# Editors
+.vscode/
+.idea/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Cache directories
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Backup files
+*.bak
+*.backup
+
+# Temporary files
+*.tmp
+*.temp
+
+# Coverage reports
+coverage/
+htmlcov/
+
+# Test results
+test-results/
+junit.xml
+
+# Compressed archives
+*.zip
+*.tar.gz
+*.tar.bz2
+*.tar.xz
+*.gz
+*.rar
+*.7z
+
+# IDE specific
+*.swp
+*.swo
+
+# Bitrix specific
+bitrix/cache/
+bitrix/managed_cache/
+bitrix/stack_cache/
+upload/tmp/
