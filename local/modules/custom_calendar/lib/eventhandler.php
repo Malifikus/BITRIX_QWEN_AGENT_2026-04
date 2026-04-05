@@ -7,7 +7,22 @@ use Bitrix\Main\EventResult;
 
 class EventHandler
 {
-    public static function onBeforeCalendarEventSave(Event $event)
+    public static function onBeforeCalendarEventAdd(Event $event)
+    {
+        return self::validateAndSave($event);
+    }
+    
+    public static function onAfterCalendarEventAdd(Event $event)
+    {
+        return new EventResult();
+    }
+    
+    public static function onBeforeCalendarEventUpdate(Event $event)
+    {
+        return self::validateAndSave($event);
+    }
+    
+    private static function validateAndSave(Event $event)
     {
         $fields = $event->getParameter('fields');
         $request = \Bitrix\Main\Context::getCurrent()->getRequest();
@@ -41,12 +56,6 @@ class EventHandler
         
         $event->setParameter('fields', array_merge($fields, ['DESCRIPTION' => $description]));
         
-        return new EventResult();
-    }
-    
-    public static function onAfterCalendarEventSave(Event $event)
-    {
-        // Дополнительная логика после сохранения при необходимости
         return new EventResult();
     }
 }

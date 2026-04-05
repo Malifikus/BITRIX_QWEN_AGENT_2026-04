@@ -1,10 +1,16 @@
-<?
+<?php
+/**
+ * @file include.php
+ * Основной файл модуля custom_calendar
+ */
+
 if (!defined("B_PROLOG_INCLUDED") || B_PROLOG_INCLUDED !== true) {
     die();
 }
 
-use Bitrix\Main\Loader;
-use Bitrix\Main\ModuleManager;
+use Bitrix\Main\Localization\Loc;
+
+Loc::loadMessages(__FILE__);
 
 class custom_calendar extends CModule
 {
@@ -16,6 +22,7 @@ class custom_calendar extends CModule
     var $MODULE_GROUP_RIGHTS = "Y";
     var $PARTNER_NAME;
     var $PARTNER_URI;
+    var $errors = [];
 
     public function __construct()
     {
@@ -24,90 +31,154 @@ class custom_calendar extends CModule
 
         $this->MODULE_VERSION = $arModuleVersion["VERSION"];
         $this->MODULE_VERSION_DATE = $arModuleVersion["VERSION_DATE"];
-        $this->MODULE_NAME = GetMessage("CUSTOM_CALENDAR_MODULE_NAME");
-        $this->MODULE_DESCRIPTION = GetMessage("CUSTOM_CALENDAR_MODULE_DESC");
-        $this->PARTNER_NAME = GetMessage("CUSTOM_CALENDAR_PARTNER_NAME");
-        $this->PARTNER_URI = GetMessage("CUSTOM_CALENDAR_PARTNER_URI");
+        $this->MODULE_NAME = Loc::getMessage("CUSTOM_CALENDAR_MODULE_NAME");
+        $this->MODULE_DESCRIPTION = Loc::getMessage("CUSTOM_CALENDAR_MODULE_DESC");
+        $this->PARTNER_NAME = Loc::getMessage("CUSTOM_CALENDAR_PARTNER_NAME");
+        $this->PARTNER_URI = Loc::getMessage("CUSTOM_CALENDAR_PARTNER_URI");
 
-        $this->GetPath();
-    }
-
-    public function GetPath($notDocumentRoot = false)
-    {
-        if ($notDocumentRoot) {
-            return str_ireplace($_SERVER["DOCUMENT_ROOT"], "", __DIR__);
-        } else {
-            return __DIR__;
-        }
+        $this->eventHandlers = [
+            "calendar" => [
+                "OnBeforeCalendarEventAdd" => ["\\Custom\\Calendar\\EventHandler", "onBeforeCalendarEventAdd"],
+                "OnAfterCalendarEventAdd" => ["\\Custom\\Calendar\\EventHandler", "onAfterCalendarEventAdd"],
+                "OnBeforeCalendarEventUpdate" => ["\\Custom\\Calendar\\EventHandler", "onBeforeCalendarEventUpdate"],
+            ]
+        ];
     }
 
     public function DoInstall()
     {
         global $APPLICATION;
+        
         $this->InstallFiles();
-        $this->InstallDB();
-        $APPLICATION->IncludeAdminFile(GetMessage("CUSTOM_CALENDAR_INSTALL_TITLE"), $this->GetPath() . "/install/step.php");
+        $this->InstallComponents();
+        $this->RegisterModule();
+        $this->InstallEvents();
+        
+        return true;
     }
 
     public function DoUninstall()
     {
         global $APPLICATION;
+        
+        $this->UnInstallEvents();
+        $this->UnRegisterModule();
+        $this->UnInstallComponents();
         $this->UnInstallFiles();
-        $this->UnInstallDB();
-        $APPLICATION->IncludeAdminFile(GetMessage("CUSTOM_CALENDAR_UNINSTALL_TITLE"), $this->GetPath() . "/install/unstep.php");
-    }
-
-    public function InstallFiles()
-    {
-        CopyDirFiles(__DIR__ . "/install/components", $_SERVER["DOCUMENT_ROOT"] . "/local/components", true, true);
-        CopyDirFiles(__DIR__ . "/install/js", $_SERVER["DOCUMENT_ROOT"] . "/local/js", true, true);
+        
         return true;
     }
 
-    public function UnInstallFiles()
+    public function InstallEvents()
     {
-        DeleteDirFilesEx("/local/components/custom/calendar.event.edit");
-        DeleteDirFilesEx("/local/js/custom_calendar");
+        foreach ($this->eventHandlers as $eventModule => $handlers) {
+            foreach ($handlers as $eventName => $callback) {
+                \Bitrix\Main\EventManager::getInstance()->registerEventHandler(
+                    $eventModule,
+                    $eventName,
+                    $this->MODULE_ID,
+                    $callback[0],
+                    $callback[1]
+                );
+            }
+        }
+        
         return true;
     }
 
-    public function InstallDB()
+    public function UnInstallEvents()
     {
-        RegisterModule($this->MODULE_ID);
-        \Bitrix\Main\EventManager::getInstance()->registerEventHandler(
-            'calendar',
-            'OnBeforeCalendarEventSave',
-            $this->MODULE_ID,
-            '\Custom\Calendar\EventHandler',
-            'onBeforeCalendarEventSave'
-        );
-        \Bitrix\Main\EventManager::getInstance()->registerEventHandler(
-            'calendar',
-            'OnAfterCalendarEventSave',
-            $this->MODULE_ID,
-            '\Custom\Calendar\EventHandler',
-            'onAfterCalendarEventSave'
-        );
+        foreach ($this->eventHandlers as $eventModule => $handlers) {
+            foreach ($handlers as $eventName => $callback) {
+                \Bitrix\Main\EventManager::getInstance()->unRegisterEventHandler(
+                    $eventModule,
+                    $eventName,
+                    $this->MODULE_ID,
+                    $callback[0],
+                    $callback[1]
+                );
+            }
+        }
+        
         return true;
     }
 
-    public function UnInstallDB()
+    public function InstallFiles($arParams = [])
     {
-        UnRegisterModule($this->MODULE_ID);
-        \Bitrix\Main\EventManager::getInstance()->unRegisterEventHandler(
-            'calendar',
-            'OnBeforeCalendarEventSave',
-            $this->MODULE_ID,
-            '\Custom\Calendar\EventHandler',
-            'onBeforeCalendarEventSave'
-        );
-        \Bitrix\Main\EventManager::getInstance()->unRegisterEventHandler(
-            'calendar',
-            'OnAfterCalendarEventSave',
-            $this->MODULE_ID,
-            '\Custom\Calendar\EventHandler',
-            'onAfterCalendarEventSave'
-        );
+        // Копирование JS файлов
+        if ($dir = opendir(__DIR__ . "/install/js")) {
+            while (false !== ($item = readdir($dir))) {
+                if (in_array($item, [".", ".."])) {
+                    continue;
+                }
+                
+                $source = __DIR__ . "/install/js/" . $item;
+                $target = $_SERVER["DOCUMENT_ROOT"] . "/local/js/calendar/" . $item;
+                
+                if (is_dir($source)) {
+                    CopyDirFiles($source, $target, true, true);
+                } else {
+                    CopyFileWithMerge($source, $target);
+                }
+            }
+            closedir($dir);
+        }
+        
         return true;
+    }
+
+    public function UnInstallFiles($arParams = [])
+    {
+        // Удаление JS файлов
+        $jsPath = $_SERVER["DOCUMENT_ROOT"] . "/local/js/calendar/";
+        if (file_exists($jsPath)) {
+            DeleteDirFilesEx("/local/js/calendar/");
+        }
+        
+        return true;
+    }
+
+    public function InstallComponents($arParams = [])
+    {
+        // Установка компонентов
+        if ($dir = opendir(__DIR__ . "/install/components/custom")) {
+            while (false !== ($item = readdir($dir))) {
+                if (in_array($item, [".", ".."])) {
+                    continue;
+                }
+                
+                $source = __DIR__ . "/install/components/custom/" . $item;
+                $target = $_SERVER["DOCUMENT_ROOT"] . "/local/components/custom/" . $item;
+                
+                if (is_dir($source)) {
+                    CopyDirFiles($source, $target, true, true);
+                }
+            }
+            closedir($dir);
+        }
+        
+        return true;
+    }
+
+    public function UnInstallComponents($arParams = [])
+    {
+        // Удаление компонентов
+        DeleteDirFilesEx("/local/components/custom/calendar.event.edit/");
+        
+        return true;
+    }
+
+    public function GetModuleRightList()
+    {
+        $arr = [
+            "reference_id" => ["D", "K", "F", "W"],
+            "reference" => [
+                "[D] ".Loc::getMessage("CUSTOM_CALENDAR_RIGHT_D"),
+                "[K] ".Loc::getMessage("CUSTOM_CALENDAR_RIGHT_K"),
+                "[F] ".Loc::getMessage("CUSTOM_CALENDAR_RIGHT_F"),
+                "[W] ".Loc::getMessage("CUSTOM_CALENDAR_RIGHT_W"),
+            ],
+        ];
+        return $arr;
     }
 }
