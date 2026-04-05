@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ app_name }} - Вебинары</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #e4e4e4;
+            min-height: 100vh;
+        }
+        .navbar {
+            background: rgba(255,255,255,0.05);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .navbar h1 { color: #00d4ff; font-size: 1.5rem; }
+        .nav-links a {
+            color: #8892a8;
+            text-decoration: none;
+            margin-left: 1.5rem;
+            transition: color 0.3s;
+        }
+        .nav-links a:hover { color: #00d4ff; }
+        .container { max-width: 1400px; margin: 0 auto; padding: 2rem; }
+        .section-title { font-size: 1.5rem; margin-bottom: 1.5rem; color: #fff; }
+        .webinar-card {
+            background: linear-gradient(135deg, rgba(0,212,255,0.1) 0%, rgba(16,185,129,0.1) 100%);
+            border-radius: 12px;
+            padding: 2rem;
+            border: 1px solid rgba(0,212,255,0.3);
+            margin-bottom: 1.5rem;
+            transition: all 0.3s;
+        }
+        .webinar-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 40px rgba(0,212,255,0.2);
+        }
+        .webinar-title { color: #00d4ff; font-size: 1.4rem; margin-bottom: 0.75rem; }
+        .webinar-meta {
+            display: flex;
+            gap: 2rem;
+            color: #8892a8;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+        .webinar-meta span { display: flex; align-items: center; gap: 0.5rem; }
+        .webinar-desc { color: #e4e4e4; line-height: 1.6; margin-bottom: 1.5rem; }
+        .btn {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            background: #00d4ff;
+            color: #000;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+        }
+        .btn:hover { background: #00b8e6; transform: scale(1.05); }
+        .btn-secondary {
+            background: rgba(255,255,255,0.1);
+            color: #e4e4e4;
+        }
+        .btn-secondary:hover { background: rgba(0,212,255,0.2); color: #00d4ff; }
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            background: rgba(34,197,94,0.2);
+            color: #22c55e;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <h1>🎓 {{ app_name }}</h1>
+        <div class="nav-links">
+            <a href="/">Главная</a>
+            <a href="/courses">Курсы</a>
+            <a href="/employees">Сотрудники</a>
+            <a href="/statistics">Статистика</a>
+            <a href="/webinars">Вебинары</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h2 class="section-title">📹 Предстоящие вебинары</h2>
+        
+        {% for webinar in webinars %}
+        <div class="webinar-card">
+            <span class="badge">Онлайн</span>
+            <h3 class="webinar-title">{{ webinar.title }}</h3>
+            <div class="webinar-meta">
+                <span>📅 {{ webinar.start_time.strftime('%d.%m.%Y') }}</span>
+                <span>🕐 {{ webinar.start_time.strftime('%H:%M') }} - {{ webinar.end_time.strftime('%H:%M') }}</span>
+                <span>👥 {{ webinar.registered_count }} зарегистрировано</span>
+            </div>
+            <p class="webinar-desc">{{ webinar.description }}</p>
+            <div style="display: flex; gap: 1rem;">
+                <a href="{{ webinar.meeting_url }}" class="btn" target="_blank">Присоединиться к вебинару</a>
+                <button class="btn btn-secondary">Напомнить за час</button>
+            </div>
+        </div>
+        {% endfor %}
+
+        <h2 class="section-title" style="margin-top: 3rem;">📼 Записи прошедших вебинаров</h2>
+        <div class="webinar-card" style="background: rgba(255,255,255,0.03); border-color: rgba(255,255,255,0.1);">
+            <h3 class="webinar-title" style="color: #8892a8;">Введение в Битрикс24 для новых сотрудников</h3>
+            <div class="webinar-meta">
+                <span>📅 10.01.2024</span>
+                <span>⏱ 1ч 30мин</span>
+            </div>
+            <button class="btn btn-secondary">▶ Смотреть запись</button>
+        </div>
+        <div class="webinar-card" style="background: rgba(255,255,255,0.03); border-color: rgba(255,255,255,0.1);">
+            <h3 class="webinar-title" style="color: #8892a8;">Эффективные техники продаж 2024</h3>
+            <div class="webinar-meta">
+                <span>📅 05.01.2024</span>
+                <span>⏱ 2ч 15мин</span>
+            </div>
+            <button class="btn btn-secondary">▶ Смотреть запись</button>
+        </div>
+    </div>
+</body>
+</html>

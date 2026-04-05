@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ app_name }} - {{ user.name }}</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #e4e4e4;
+            min-height: 100vh;
+        }
+        .navbar {
+            background: rgba(255,255,255,0.05);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .navbar h1 { color: #00d4ff; font-size: 1.5rem; }
+        .nav-links a {
+            color: #8892a8;
+            text-decoration: none;
+            margin-left: 1.5rem;
+            transition: color 0.3s;
+        }
+        .nav-links a:hover { color: #00d4ff; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+        .profile-header {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #00d4ff, #10b981);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            font-weight: bold;
+            color: #fff;
+        }
+        .profile-info h2 { font-size: 1.8rem; color: #fff; margin-bottom: 0.5rem; }
+        .profile-info p { color: #8892a8; margin-bottom: 0.25rem; }
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            background: rgba(0,212,255,0.2);
+            color: #00d4ff;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            margin-top: 0.5rem;
+        }
+        .progress-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .progress-card {
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .progress-card h3 { color: #fff; margin-bottom: 1rem; }
+        .progress-bar {
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            height: 10px;
+            overflow: hidden;
+            margin: 1rem 0;
+        }
+        .progress-fill {
+            background: linear-gradient(90deg, #00d4ff, #10b981);
+            height: 100%;
+            border-radius: 10px;
+        }
+        .task-list {
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+        .task-item {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .task-item:last-child { border-bottom: none; }
+        .task-status {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 1rem;
+        }
+        .status-new { background: #fbbf24; }
+        .status-progress { background: #00d4ff; }
+        .status-completed { background: #22c55e; }
+        .task-title { flex: 1; color: #fff; }
+        .task-date { color: #8892a8; font-size: 0.85rem; }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <h1>🎓 {{ app_name }}</h1>
+        <div class="nav-links">
+            <a href="/">Главная</a>
+            <a href="/courses">Курсы</a>
+            <a href="/employees">Сотрудники</a>
+            <a href="/statistics">Статистика</a>
+            <a href="/webinars">Вебинары</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="profile-header">
+            <div class="avatar">{{ user.name[0] if user.name else '?' }}</div>
+            <div class="profile-info">
+                <h2>{{ user.name }}</h2>
+                <p>📧 {{ user.email }}</p>
+                <p>💼 {{ user.position }}</p>
+                <span class="badge">{{ user.department }}</span>
+            </div>
+        </div>
+
+        <h3 style="margin-bottom: 1rem; color: #fff;">📊 Прогресс обучения</h3>
+        <div class="progress-grid">
+            {% for p in progress %}
+            <div class="progress-card">
+                <h3>Курс #{{ p.course_id }}</h3>
+                <div style="display: flex; justify-content: space-between; color: #8892a8; font-size: 0.9rem;">
+                    <span>{{ p.lessons_completed }}/{{ p.total_lessons }} уроков</span>
+                    <span>{{ "%.0f"|format(p.progress_percent) }}%</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: {{ p.progress_percent }}%;"></div>
+                </div>
+                <span style="color: {% if p.status == 'completed' %}#22c55e{% elif p.status == 'in_progress' %}#00d4ff{% else %}#8892a8{% endif %};">
+                    {% if p.status == 'completed' %}✅ Завершено{% elif p.status == 'in_progress' %}🔄 В процессе{% else %}⏸ Не начато{% endif %}
+                </span>
+            </div>
+            {% endfor %}
+        </div>
+
+        <h3 style="margin-bottom: 1rem; color: #fff;">📋 Учебные задачи</h3>
+        <div class="task-list">
+            {% for task in tasks %}
+            <div class="task-item">
+                <span class="task-status status-{{ task.status }}"></span>
+                <span class="task-title">{{ task.title }}</span>
+                <span class="task-date">{{ task.deadline }}</span>
+            </div>
+            {% endfor %}
+            {% if not tasks %}
+            <p style="color: #8892a8; text-align: center; padding: 2rem;">Нет активных задач</p>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

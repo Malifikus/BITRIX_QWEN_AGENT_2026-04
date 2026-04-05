@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ app_name }} - {{ course.title }}</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #e4e4e4;
+            min-height: 100vh;
+        }
+        .navbar {
+            background: rgba(255,255,255,0.05);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .navbar h1 { color: #00d4ff; font-size: 1.5rem; }
+        .nav-links a {
+            color: #8892a8;
+            text-decoration: none;
+            margin-left: 1.5rem;
+            transition: color 0.3s;
+        }
+        .nav-links a:hover { color: #00d4ff; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+        .course-header {
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .course-title { font-size: 2rem; color: #fff; margin-bottom: 1rem; }
+        .course-desc { color: #8892a8; line-height: 1.6; margin-bottom: 1.5rem; }
+        .course-meta {
+            display: flex;
+            gap: 2rem;
+            color: #8892a8;
+            flex-wrap: wrap;
+        }
+        .lessons-list {
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .lesson-item {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            transition: all 0.3s;
+        }
+        .lesson-item:last-child { border-bottom: none; }
+        .lesson-item:hover {
+            background: rgba(255,255,255,0.05);
+            padding-left: 1.5rem;
+        }
+        .lesson-number {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(0,212,255,0.2);
+            color: #00d4ff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 1rem;
+        }
+        .lesson-info { flex: 1; }
+        .lesson-title { color: #fff; font-size: 1.1rem; margin-bottom: 0.25rem; }
+        .lesson-meta { color: #8892a8; font-size: 0.85rem; }
+        .lesson-type {
+            padding: 0.25rem 0.75rem;
+            background: rgba(0,212,255,0.1);
+            color: #00d4ff;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            margin-left: 1rem;
+        }
+        .btn {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            background: #00d4ff;
+            color: #000;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+        }
+        .btn:hover { background: #00b8e6; transform: scale(1.05); }
+        .btn-large { padding: 1rem 2rem; font-size: 1.1rem; }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <h1>🎓 {{ app_name }}</h1>
+        <div class="nav-links">
+            <a href="/">Главная</a>
+            <a href="/courses">Курсы</a>
+            <a href="/employees">Сотрудники</a>
+            <a href="/statistics">Статистика</a>
+            <a href="/webinars">Вебинары</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="course-header">
+            <h2 class="course-title">{{ course.title }}</h2>
+            <p class="course-desc">{{ course.description }}</p>
+            <div class="course-meta">
+                <span>⏱ {{ course.duration_hours }} часов</span>
+                <span>📚 {{ course.lessons_count }} уроков</span>
+                <span>👥 {{ course.enrolled_count }} обучаются</span>
+                <span>✅ Статус: {{ course.status }}</span>
+            </div>
+            <button class="btn btn-large" style="margin-top: 1.5rem;">Начать обучение</button>
+        </div>
+
+        <h3 style="margin-bottom: 1rem; color: #fff;">📖 Программа курса</h3>
+        <div class="lessons-list">
+            {% for lesson in lessons %}
+            <div class="lesson-item">
+                <div class="lesson-number">{{ lesson.order }}</div>
+                <div class="lesson-info">
+                    <h4 class="lesson-title">{{ lesson.title }}</h4>
+                    <div class="lesson-meta">⏱ {{ lesson.duration_minutes }} минут</div>
+                </div>
+                <span class="lesson-type">{{ lesson.content_type }}</span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</body>
+</html>
